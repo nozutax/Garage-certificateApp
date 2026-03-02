@@ -559,6 +559,8 @@
                     tempMultiRect = { x1: mapStartX, y1: mapStartY, x2: endX, y2: endY, color: currentColor };
                     document.getElementById('modal-overlay').style.display = 'block';
                     document.getElementById('multi-modal').style.display = 'block';
+                    const mc = document.getElementById('multi-count');
+                    if (mc) { mc.focus(); mc.select(); }
                     tempMultiRectForMap = true;
                 } else if (currentTool === 'dist') {
                     const d = prompt("距離を入力:");
@@ -586,6 +588,8 @@
                 tempMultiRect = {x1:startX, y1:startY, x2:endX, y2:endY, color:currentColor};
                 document.getElementById('modal-overlay').style.display = 'block';
                 document.getElementById('multi-modal').style.display = 'block';
+                const mc = document.getElementById('multi-count');
+                if (mc) { mc.focus(); mc.select(); }
                 tempMultiRectForMap = false;
             } else if (currentTool === 'dist') {
                 const d = prompt("距離を入力:");
@@ -1032,7 +1036,13 @@
             }
 
             redraw(); 
-            document.querySelectorAll('.toolbar button').forEach(b => b.classList.toggle('active', b.id === 'tool-'+t)); 
+            document.querySelectorAll('.toolbar button').forEach(b => b.classList.toggle('active', b.id === 'tool-'+t));
+
+            // ツールごとにデフォルトのフォーカス位置を数値入力系フォームに合わせる
+            if (t === 'text') {
+                const sizeEl = document.getElementById('text-size');
+                if (sizeEl) sizeEl.focus();
+            }
         }
 
         function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('multi-modal').style.display = 'none'; }
