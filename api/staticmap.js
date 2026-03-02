@@ -2,37 +2,35 @@ const https = require('https');
 
 export default function handler(req, res) {
   // ---------------------------------------------------------
-  // 1. 設定部分
-  // ---------------------------------------------------------
-  const API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-  
-  // あなたのVercelのURLを許可リストに入れます
-  // (スクリーンショットにあったURLを記載しておきました)
-  const ALLOWED_ORIGINS = [
-    'https://garage-certificate-6gw5u8zzv-nozutaxs-projects.vercel.app',
-    'http://localhost:3000'
-  ];
-
-  // ---------------------------------------------------------
-  // 2. セキュリティチェック（検問）
+  // 1. セキュリティチェック（検問）修正版
   // ---------------------------------------------------------
   const referer = req.headers.referer || req.headers.origin;
-  
-  // 自分のサイト以外からのアクセスなら拒否する
-  // (refererがない場合も弾きたい場合は条件を調整してください)
-  const isAllowed = referer && ALLOWED_ORIGINS.some(origin => referer.startsWith(origin));
+
+  // ★変更点：URLが完全に一致しなくても、
+  // 「プロジェクト名」か「localhost」が含まれていればOKにします。
+  const isAllowed = referer && (
+    referer.includes('garage-certificate') || // プロジェクト名が含まれていればOK
+    referer.includes('localhost')             // 自分のPCでの開発もOK
+  );
+
+  // もしチェック自体を無効にして、とにかく動かしたい場合は
+  // 上のコードを消して、単に const isAllowed = true; と書いてください。
 
   if (!isAllowed) {
-    // 開発中などで困る場合は、一旦ここをコメントアウトしてもOKです
+    // どのURLから来てブロックされたかログに残す（Vercelの管理画面で見れます）
     console.warn(`Blocked access from: ${referer || 'Unknown'}`);
     return res.status(403).json({ error: 'Forbidden: Access denied from this domain.' });
   }
 
   // ---------------------------------------------------------
-  // 3. パラメータのチェック
+  // 2. 設定部分
   // ---------------------------------------------------------
+  const API_KEY = process.env.GOOGLE_MAPS_API_KEY;
   const { center, zoom } = req.query;
 
+  // ---------------------------------------------------------
+  // 3. パラメータのチェック
+  // ---------------------------------------------------------
   if (!center || center.trim() === '') {
     return res.status(400).json({ error: 'center is required' });
   }
@@ -46,13 +44,11 @@ export default function handler(req, res) {
   // ---------------------------------------------------------
   const zoomNum = Math.min(20, Math.max(1, parseInt(zoom, 10) || 15));
 
-  // Google Static Maps APIのURLを作成
   const url = 'https://maps.googleapis.com/maps/api/staticmap?center=' +
     encodeURIComponent(center.trim()) +
     '&zoom=' + zoomNum +
     '&size=708x681&scale=2&maptype=roadmap&key=' + encodeURIComponent(API_KEY);
 
-  // Googleから画像データを取得して、そのままブラウザに返す
   https.get(url, function (proxyRes) {
     if (proxyRes.statusCode !== 200) {
       let body = '';
@@ -63,7 +59,6 @@ export default function handler(req, res) {
       return;
     }
     
-    // 画像データをそのまま流す
     res.setHeader('Content-Type', proxyRes.headers['content-type'] || 'image/png');
     proxyRes.pipe(res);
   }).on('error', function (err) {
