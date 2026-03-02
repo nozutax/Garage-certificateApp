@@ -39,7 +39,7 @@
             background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 30px rgba(0,0,0,0.4); z-index: 1000; cursor: default;
         }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; }
-        .hint-bar { font-size: 12px; color: #666; margin-top: 5px; width: 100%; max-width: 1680px; box-sizing: border-box; }
+        .hint-bar { font-size: 12px; color: #666; margin-top: 5px; width: 1596px; max-width: 100%; box-sizing: border-box; margin-left: auto; margin-right: auto; }
         .name-input {
             padding: 6px 8px;
             font-size: 14px;
@@ -49,17 +49,26 @@
             box-sizing: border-box;
         }
         .title-row {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 708px 150px 708px;
+            column-gap: 15px;
             align-items: center;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 14px;
             cursor: default;
+        }
+        .title-row h2 {
+            grid-column: 1;
         }
         .title-row .right-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: flex-end;
+            gap: 8px;
+            grid-column: 3;
+        }
+        .title-row .right-group label {
+            font-size: 13px;
         }
         .header-toolbar-wrap {
             width: 100%;
@@ -73,21 +82,19 @@
             max-width: 100%;
             display: flex;
             flex-direction: column;
+            margin: 0 auto;
         }
         .header-toolbar-wrap .toolbar {
             width: 150px;
         }
         .toolbar-canvas-row {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            gap: 15px;
+            display: contents;
         }
         .main-content {
-            display: flex;
-            flex-direction: row;
+            display: grid;
+            grid-template-columns: 708px 150px 708px;
+            column-gap: 15px;
             align-items: flex-start;
-            gap: 15px;
         }
         .map-panel {
             display: flex;
