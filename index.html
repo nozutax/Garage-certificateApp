@@ -5,7 +5,7 @@
     <title>車庫証明　作図ツール</title>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: flex-start; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
         .toolbar { background: #f7f8fa; padding: 10px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 8px; align-items: stretch; border: 1px solid #ddd; cursor: default; width: 150px; box-sizing: border-box; }
         .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .group.group-sep { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 0; }
@@ -88,7 +88,7 @@
             max-width: 100%;
             display: flex;
             flex-direction: column;
-            margin: 0 auto;
+            margin: 0;
             padding: 16px 0 20px;
             background: #ffffff;
             border-radius: 12px;
@@ -152,9 +152,9 @@
             color: #666;
         }
         .canvas-scale-wrap {
-            transform-origin: top center;
+            transform-origin: top left;
             transform: scale(0.67);
-            margin: 0 auto;
+            margin: 0;
             width: 1596px;
             max-width: 100%;
         }
