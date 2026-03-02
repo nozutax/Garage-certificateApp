@@ -66,7 +66,13 @@
             max-width: 1680px;
             display: flex;
             flex-direction: column;
-            align-items: stretch;
+            align-items: flex-start;
+        }
+        .header-content-block {
+            width: 1596px;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
         }
         .header-toolbar-wrap .toolbar {
             width: 150px;
@@ -138,6 +144,7 @@
     <div id="custom-cursor"></div>
 
     <div class="header-toolbar-wrap">
+        <div class="header-content-block">
         <div class="title-row">
             <h2 style="margin: 0;">車庫証明　作図ツール</h2>
             <div class="right-group">
@@ -146,7 +153,6 @@
                 <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
             </div>
         </div>
-
         <div class="canvas-scale-wrap" id="canvas-scale-wrap">
         <div class="main-content">
         <div class="map-panel">
@@ -227,6 +233,7 @@
 
     <div id="canvas-container">
         <canvas id="draw-canvas" width="708" height="681"></canvas>
+    </div>
     </div>
     </div>
     </div>
