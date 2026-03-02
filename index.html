@@ -165,7 +165,7 @@
         <div class="title-row">
             <h2 class="title-left">車庫証明　作図ツール</h2>
             <div class="title-main">
-                <label for="user-name">氏名</label>
+                <label for="user-name"ファイル名用</label>
                 <input type="text" id="user-name" class="name-input" placeholder="氏名を入力" />
                 <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
             </div>
@@ -1038,10 +1038,14 @@
             redraw(); 
             document.querySelectorAll('.toolbar button').forEach(b => b.classList.toggle('active', b.id === 'tool-'+t));
 
-            // ツールごとにデフォルトのフォーカス位置を数値入力系フォームに合わせる
+            // 文字ツール選択時は、文字入力モーダルが開いていればそのテキストエリアにフォーカスを当てる
             if (t === 'text') {
-                const sizeEl = document.getElementById('text-size');
-                if (sizeEl) sizeEl.focus();
+                const textModal = document.getElementById('text-modal');
+                const textArea = document.getElementById('text-input-area');
+                if (textModal && textArea && textModal.style.display !== 'none') {
+                    textArea.focus();
+                    textArea.select();
+                }
             }
         }
 
