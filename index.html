@@ -311,13 +311,16 @@
         function updateCanvasScale() {
             const wrap = document.getElementById('canvas-scale-wrap');
             if (!wrap) return;
+            // 一度リセットして本来のサイズを取得
             wrap.style.transform = '';
             const rect = wrap.getBoundingClientRect();
             const totalW = rect.width;
             const totalH = rect.height;
             const availW = window.innerWidth - 40;
             const availH = window.innerHeight - 150;
-            const scale = Math.min(availW / totalW, availH / totalH, 1);
+            const rawScale = Math.min(availW / totalW, availH / totalH);
+            // デフォルトは最大 67%（画面が狭いときはそれ以下に自動調整）
+            const scale = Math.min(rawScale, 0.67);
             wrap.style.transform = 'scale(' + scale + ')';
         }
 
