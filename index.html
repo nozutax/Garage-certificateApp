@@ -330,8 +330,8 @@
         function updateCanvasScale() {
             const wrap = document.getElementById('canvas-scale-wrap');
             if (!wrap) return;
-            // フレキシブルなスケーリングは行わず、常に等倍表示に固定
-            wrap.style.transform = 'scale(1)';
+            // 常に 67% 表示に固定
+            wrap.style.transform = 'scale(0.67)';
         }
 
         function getPos(clientX, clientY) {
