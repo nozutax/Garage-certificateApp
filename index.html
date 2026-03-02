@@ -326,22 +326,11 @@
         window.addEventListener('keydown', (e) => { if(e.key === 'Shift') { isShiftDown = true; redraw(); redrawMap(); } });
         window.addEventListener('keyup', (e) => { if(e.key === 'Shift') { isShiftDown = false; redraw(); redrawMap(); } });
 
-        const BASE_LAYOUT_WIDTH = 1596;  // 地図 + ツールバー + 描写キャンバス
-        const BASE_LAYOUT_HEIGHT = 681;  // キャンバス高さを基準にする
-
         function updateCanvasScale() {
             const wrap = document.getElementById('canvas-scale-wrap');
             if (!wrap) return;
-            // 一度リセットしてから、基準サイズに対するスケールを計算
+            // フレキシブルなスケーリングは行わず、常に等倍表示に固定
             wrap.style.transform = 'scale(1)';
-            const availW = window.innerWidth - 40;   // body の左右パディング分を引く
-            const availH = window.innerHeight - 220; // タイトルや余白分をざっくり差し引く
-            const scale = Math.min(
-                availW / BASE_LAYOUT_WIDTH,
-                availH / BASE_LAYOUT_HEIGHT,
-                1
-            );
-            wrap.style.transform = 'scale(' + scale + ')';
         }
 
         function getPos(clientX, clientY) {
