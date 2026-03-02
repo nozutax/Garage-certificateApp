@@ -1067,8 +1067,29 @@
             redraw();
         }
         document.getElementById('text-modal-overlay').addEventListener('click', closeTextModal);
-        function undo() { shapes.pop(); hatchPoints=[]; redraw(); }
-        function clearCanvas() { if(confirm("全消去しますか？")) { shapes = []; hatchPoints=[]; redraw(); } }
+        function undo() {
+            // 右（メイン）と左（地図）両方の描写領域について、最後の要素を1つずつ取り消す
+            if (shapes.length > 0) {
+                shapes.pop();
+            }
+            if (mapShapes.length > 0) {
+                mapShapes.pop();
+            }
+            hatchPoints = [];
+            mapHatchPoints = [];
+            redraw();
+            redrawMap();
+        }
+        function clearCanvas() {
+            if(confirm("全消去しますか？")) {
+                shapes = [];
+                hatchPoints = [];
+                mapShapes = [];
+                mapHatchPoints = [];
+                redraw();
+                redrawMap();
+            }
+        }
 
         async function generateFinalPDF() {
             try {
