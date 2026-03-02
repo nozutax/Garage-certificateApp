@@ -486,10 +486,14 @@
                 }
                 mapStartX = p.x; mapStartY = p.y; mapDrawing = true;
                 if (currentTool === 'text') {
-                    document.getElementById('text-input-area').value = '';
+                    const textArea = document.getElementById('text-input-area');
                     document.getElementById('text-modal-overlay').style.display = 'block';
                     document.getElementById('text-modal').style.display = 'block';
-                    document.getElementById('text-input-area').focus();
+                    if (textArea) {
+                        textArea.value = '';
+                        // レイアウト反映後にフォーカスを当てないとブラウザによっては無視されるため、少し遅延させる
+                        setTimeout(() => { textArea.focus(); textArea.select(); }, 0);
+                    }
                     mapPendingTextPos = { x: p.x, y: p.y };
                     mapDrawing = false;
                 }
@@ -529,10 +533,13 @@
             startX = p.x; startY = p.y; drawing = true;
 
             if (currentTool === 'text') {
-                document.getElementById('text-input-area').value = '';
+                const textArea = document.getElementById('text-input-area');
                 document.getElementById('text-modal-overlay').style.display = 'block';
                 document.getElementById('text-modal').style.display = 'block';
-                document.getElementById('text-input-area').focus();
+                if (textArea) {
+                    textArea.value = '';
+                    setTimeout(() => { textArea.focus(); textArea.select(); }, 0);
+                }
                 pendingTextPos = { x: startX, y: startY };
                 drawing = false;
             }
