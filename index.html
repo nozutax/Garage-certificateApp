@@ -328,10 +328,8 @@
         window.addEventListener('keyup', (e) => { if(e.key === 'Shift') { isShiftDown = false; redraw(); redrawMap(); } });
 
         function updateCanvasScale() {
-            const wrap = document.getElementById('canvas-scale-wrap');
-            if (!wrap) return;
-            // 常に 67% 表示に固定
-            wrap.style.transform = 'scale(0.67)';
+            // レイアウトの倍率は CSS の .canvas-scale-wrap のみで管理する
+            return;
         }
 
         function getPos(clientX, clientY) {
