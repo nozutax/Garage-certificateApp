@@ -39,7 +39,15 @@
             background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 30px rgba(0,0,0,0.4); z-index: 1000; cursor: default;
         }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; }
-        .hint-bar { font-size: 11px; color: #888; margin-top: 8px; width: 1596px; max-width: 100%; box-sizing: border-box; margin-left: auto; margin-right: auto; text-align: center; }
+        .hint-bar {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+            width: 708px;
+            max-width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
         .name-input {
             padding: 6px 8px;
             font-size: 14px;
@@ -175,6 +183,10 @@
                 <button type="button" onclick="mapZoomChange(-1)" title="縮小">－</button>
                 <button type="button" onclick="mapZoomChange(1)" title="拡大">＋</button>
             </div>
+            <div class="hint-bar">
+                Shiftキー：垂直・水平固定 | 領域外クリック：端にスナップして描画 | 斜線：クリックで点追加、ダブルクリックで完了<br>
+                選択：ドラッグで図形・文字を移動 | 削除：ツールで選択してクリックで図形・文字を削除
+            </div>
         </div>
         <div class="toolbar-canvas-row">
         <div class="toolbar">
@@ -247,11 +259,6 @@
     </div>
     </div>
     </div>
-    </div>
-
-    <div class="hint-bar">
-        Shiftキー：垂直・水平固定 | 領域外クリック：端にスナップして描画 | 斜線：クリックで点追加、ダブルクリックで完了<br>
-        選択：ドラッグで図形・文字を移動 | 削除：ツールで選択してクリックで図形・文字を削除
     </div>
 
     <div class="modal-overlay" id="modal-overlay"></div>
