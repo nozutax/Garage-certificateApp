@@ -6,7 +6,7 @@
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
-        .toolbar { background: #fff; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 8px; align-items: stretch; border: 1px solid #ddd; cursor: default; width: 150px; box-sizing: border-box; }
+        .toolbar { background: #f7f8fa; padding: 10px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: flex; flex-direction: column; gap: 8px; align-items: stretch; border: 1px solid #ddd; cursor: default; width: 150px; box-sizing: border-box; }
         .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .group.group-sep { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 0; }
         .text-tool-section { width: 100%; padding-left: 8px; padding-top: 4px; padding-right: 0; padding-bottom: 4px; margin-bottom: 0; border-left: 3px solid #007bff; background: #f8f9fa; border-radius: 4px; box-sizing: border-box; }
@@ -32,14 +32,14 @@
         button.active { background: #007bff; color: white; border-color: #0056b3; }
         .color-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; box-shadow: 0 0 4px rgba(0,0,0,0.2); }
         .color-btn.active { outline: 3px solid #007bff; }
-        .download-btn { background: #28a745 !important; color: white !important; font-weight: bold; border: none !important; padding: 10px 25px !important; }
+        .download-btn { background: #28a745 !important; color: white !important; font-weight: 600; border: none !important; padding: 8px 18px !important; font-size: 13px !important; }
 
         #multi-modal {
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 30px rgba(0,0,0,0.4); z-index: 1000; cursor: default;
         }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; }
-        .hint-bar { font-size: 12px; color: #666; margin-top: 5px; width: 1596px; max-width: 100%; box-sizing: border-box; margin-left: auto; margin-right: auto; }
+        .hint-bar { font-size: 11px; color: #888; margin-top: 8px; width: 1596px; max-width: 100%; box-sizing: border-box; margin-left: auto; margin-right: auto; text-align: center; }
         .name-input {
             padding: 6px 8px;
             font-size: 14px;
@@ -50,15 +50,21 @@
         }
         .title-row {
             display: grid;
-            grid-template-columns: 708px 150px 708px;
-            column-gap: 15px;
+            grid-template-columns: 1fr auto 1fr;
+            column-gap: 24px;
             align-items: center;
             width: 100%;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
             cursor: default;
         }
-        .title-row h2 {
-            grid-column: 1;
+        .title-main {
+            grid-column: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .title-main h2 {
+            margin: 0;
         }
         .title-row .right-group {
             display: flex;
@@ -83,6 +89,10 @@
             display: flex;
             flex-direction: column;
             margin: 0 auto;
+            padding: 16px 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
         }
         .header-toolbar-wrap .toolbar {
             width: 150px;
@@ -153,11 +163,13 @@
     <div class="header-toolbar-wrap">
         <div class="header-content-block">
         <div class="title-row">
-            <h2 style="margin: 0;">車庫証明　作図ツール</h2>
+            <div class="title-main">
+                <h2>車庫証明　作図ツール</h2>
+                <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
+            </div>
             <div class="right-group">
                 <label for="user-name">氏名</label>
                 <input type="text" id="user-name" class="name-input" placeholder="氏名を入力" />
-                <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
             </div>
         </div>
         <div class="canvas-scale-wrap" id="canvas-scale-wrap">
