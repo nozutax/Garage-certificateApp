@@ -49,32 +49,20 @@
             box-sizing: border-box;
         }
         .title-row {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            column-gap: 24px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             width: 100%;
             margin-bottom: 16px;
             cursor: default;
         }
-        .title-main {
-            grid-column: 2;
-            display: inline-flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .title-main h2 {
+        .title-left {
             margin: 0;
         }
-        .title-row .right-group {
-            display: flex;
+        .title-main {
+            display: inline-flex;
             align-items: center;
-            justify-content: flex-end;
-            gap: 8px;
-            grid-column: 3;
-        }
-        .title-row .right-group label {
-            font-size: 13px;
+            gap: 12px;
         }
         .header-toolbar-wrap {
             width: 100%;
@@ -167,8 +155,8 @@
     <div class="header-toolbar-wrap">
         <div class="header-content-block">
         <div class="title-row">
+            <h2 class="title-left">車庫証明　作図ツール</h2>
             <div class="title-main">
-                <h2>車庫証明　作図ツール</h2>
                 <label for="user-name">氏名</label>
                 <input type="text" id="user-name" class="name-input" placeholder="氏名を入力" />
                 <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
