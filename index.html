@@ -191,9 +191,6 @@
             <button onclick="setTool('select')" id="tool-select" class="toolbar-btn">選択</button>
         </div>
         <div class="group">
-            <button onclick="setTool('mappan')" id="tool-mappan" class="toolbar-btn">地図移動</button>
-        </div>
-        <div class="group">
             <button onclick="setTool('rect')" id="tool-rect" class="active toolbar-btn">長方形</button>
         </div>
         <div class="group">
@@ -245,9 +242,10 @@
                 <canvas id="map-canvas" width="708" height="681"></canvas>
             </div>
             <div class="map-address-row">
-                <label for="map-address">座標（緯度,経度）または住所:</label>
+                <label for="map-address">座標（緯度,経度）or住所:</label>
                 <input type="text" id="map-address" placeholder="例: 35.6595,139.7004 または 東京都渋谷区" />
                 <button type="button" onclick="loadMapImage()">地図表示</button>
+                <button type="button" onclick="setTool('mappan')" id="tool-mappan" class="toolbar-btn">地図移動</button>
                 <button type="button" onclick="mapZoomChange(-1)" title="縮小">－</button>
                 <button type="button" onclick="mapZoomChange(1)" title="拡大">＋</button>
             </div>
@@ -259,7 +257,7 @@
     </div>
     </div>
     <div class="hint-bar">
-        ヒント：Shift＝垂直・水平固定／領域外クリック＝端にスナップ／斜線＝クリックで点追加・ダブルクリックで完了／選択＝ドラッグで移動／削除＝ツール選択後クリックで削除
+        ヒント：Shift＝垂直・水平固定／網掛け＝クリックで点追加・ダブルクリックで完了／選択＝ドラッグで移動／削除＝ツール選択後クリックで削除
     </div>
     </div>
     </div>
