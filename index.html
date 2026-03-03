@@ -698,8 +698,8 @@
                     let maxW = 0;
                     lines.forEach(l => { maxW = Math.max(maxW, ctx.measureText(l).width); });
                     ctx.restore();
-                    const top = s.y - fontSize * 0.8;
-                    const bottom = s.y + (lines.length - 1) * lineHeight + fontSize * 0.3;
+                    const top = s.y;
+                    const bottom = s.y + (lines.length - 1) * lineHeight + fontSize;
                     if (x >= s.x && x <= s.x + maxW && y >= top && y <= bottom) return i;
                 }
             }
@@ -745,8 +745,8 @@
                     let maxW = 0;
                     lines.forEach(l => { maxW = Math.max(maxW, mapCtx.measureText(l).width); });
                     mapCtx.restore();
-                    const top = s.y - fontSize * 0.8;
-                    const bottom = s.y + (lines.length - 1) * lineHeight + fontSize * 0.3;
+                    const top = s.y;
+                    const bottom = s.y + (lines.length - 1) * lineHeight + fontSize;
                     if (x >= s.x && x <= s.x + maxW && y >= top && y <= bottom) return i;
                 }
             }
@@ -844,6 +844,7 @@
                     const fontSize = s.fontSize != null ? s.fontSize : 32;
                     ctx.font = `bold ${fontSize}px sans-serif`;
                     ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
                     const lineRatio = s.lineHeight != null ? s.lineHeight : 1.25;
                     const lineHeight = fontSize * lineRatio;
                     if (s.lines && s.lines.length > 0) {
@@ -1017,6 +1018,7 @@
                 const fontSize = s.fontSize != null ? s.fontSize : 32;
                 context.font = 'bold ' + fontSize + 'px sans-serif';
                 context.textAlign = 'left';
+                context.textBaseline = 'top';
                 const lineRatio = s.lineHeight != null ? s.lineHeight : 1.25;
                 const lineHeight = fontSize * lineRatio;
                 if (s.lines && s.lines.length > 0) {
@@ -1250,6 +1252,7 @@
                         const fontSize = s.fontSize != null ? s.fontSize : 32;
                         exCtx.font = `bold ${fontSize}px sans-serif`;
                         exCtx.textAlign = 'left';
+                        exCtx.textBaseline = 'top';
                         const lineRatio = s.lineHeight != null ? s.lineHeight : 1.25;
                         const lineHeight = fontSize * lineRatio;
                         if (s.lines && s.lines.length > 0) {
