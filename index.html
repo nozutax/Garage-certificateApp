@@ -365,6 +365,7 @@
             const center = input;
             const zoom = lastMapZoom;
             const coordMatch = input.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+            // 座標で入力された場合はここで中心座標を保持
             lastMapCenterLatLng = coordMatch ? { lat: parseFloat(coordMatch[1]), lng: parseFloat(coordMatch[2]) } : null;
 
             const url = '/api/staticmap?center=' + encodeURIComponent(center) + '&zoom=' + zoom;
@@ -375,9 +376,24 @@
                             throw new Error('HTTP ' + response.status + ': ' + (text || response.statusText));
                         });
                     }
-                    return response.blob();
+                    // サーバーが返した中心座標（座標または住所→座標）を取得
+                    const xMapCenter = response.headers.get('X-Map-Center');
+                    return response.blob().then(function(blob) {
+                        return { blob: blob, xMapCenter: xMapCenter };
+                    });
                 })
-                .then(function(blob) {
+                .then(function(data) {
+                    const blob = data.blob;
+                    const xMapCenter = data.xMapCenter;
+                    if (xMapCenter) {
+                        const parts = xMapCenter.split(',');
+                        if (parts.length >= 2) {
+                            lastMapCenterLatLng = {
+                                lat: parseFloat(parts[0]),
+                                lng: parseFloat(parts[1])
+                            };
+                        }
+                    }
                     const objectUrl = URL.createObjectURL(blob);
                     const img = new Image();
                     img.onload = function() {
@@ -426,12 +442,11 @@
             return { dlat, dlng };
         }
 
-        // 地図パン終了時：座標指定の場合は新しい中心で再取得。住所指定の場合はヒントを表示して同じ住所で再取得
+        // 地図パン終了時：中心座標から新しい中心を算出して再取得（住所でも座標でも共通）
         function reloadMapAfterPan() {
             if (!mapBackgroundImage || !lastMapCenter) return;
             if (!lastMapCenterLatLng) {
-                // 住所指定でドラッグした場合
-                alert('指定個所を座標で入力してください。');
+                // 万一中心座標がない場合は元の位置で描き直す
                 mapOffsetX = 0;
                 mapOffsetY = 0;
                 loadMapImage();
