@@ -4,42 +4,12 @@ export default function handler(req, res) {
   // ---------------------------------------------------------
   // 1. セキュリティチェック（検問）強化版
   // ---------------------------------------------------------
-  const referer = req.headers.referer || req.headers.origin;
+  const referer = req.headers.referer || req.headers.origin || '';
 
-  // 許可するドメインのリスト（本番環境のドメインとlocalhost）
-  // ※ 'https://' から始まる完全なオリジンを指定してください
-  const ALLOWED_ORIGINS = [
-    'http://localhost:3000', // ローカル開発用
-    'https://garage-certificate-app.vercel.app/', // あなたの本番ドメイン例
-    // 必要に応じて追加
-  ];
-
-  let isAllowed = false;
-
-  if (referer) {
-    try {
-      // URLオブジェクトを使ってオリジン（プロトコル+ドメイン+ポート）だけを抽出
-      // 例: "https://site.com/page?q=1" -> "https://site.com"
-      const requestOrigin = new URL(referer).origin;
-      
-      // 完全一致でチェック（includeは使いません）
-      // または、サブドメインを許可したい場合は endsWith を使うなどの工夫が必要です
-      if (ALLOWED_ORIGINS.includes(requestOrigin)) {
-        isAllowed = true;
-      }
-      
-      // Vercelのプレビュー環境など、動的なドメイン許可が必要な場合の例（サブドメイン一致）:
-      // if (requestOrigin.endsWith('.vercel.app') && requestOrigin.includes('garage-certificate')) {
-      //   isAllowed = true;
-      // }
-
-    } catch (e) {
-      console.error('Invalid URL in referer:', referer);
-    }
-  }
-
-  // デバッグ用: 開発中はここをtrueにしておくと楽ですが、公開時は必ずfalse相当のロジックに戻してください
-  // const isAllowed = true; 
+  // Vercel本番とlocalhostだけを許可
+  const isAllowed =
+    referer.includes('https://garage-certificate-app.vercel.app') ||
+    referer.includes('http://localhost:3000');
 
   if (!isAllowed) {
     console.warn(`Blocked access from: ${referer || 'Unknown'}`);
