@@ -1086,8 +1086,10 @@
                 setColor('#000000');
             }
 
-            redraw(); 
+            redraw();
             document.querySelectorAll('.toolbar button').forEach(b => b.classList.toggle('active', b.id === 'tool-'+t));
+            var mappanBtn = document.getElementById('tool-mappan');
+            if (mappanBtn) mappanBtn.classList.toggle('active', t === 'mappan');
 
             // 文字ツール選択時は、文字入力モーダルが開いていればそのテキストエリアにフォーカスを当てる
             if (t === 'text') {
