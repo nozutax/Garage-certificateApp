@@ -60,9 +60,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 1596px;
-            max-width: 100%;
-            margin-bottom: 16px;
+            width: 100%;
             cursor: default;
             box-sizing: border-box;
         }
@@ -156,6 +154,19 @@
             width: 1596px;
             max-width: 100%;
         }
+        .app-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            max-width: 1596px;
+            padding: 24px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body onmousemove="handleGlobalMouseMove(event)" onmousedown="handleGlobalMouseDown(event)" onmouseup="handleGlobalMouseUp(event)">
@@ -164,6 +175,7 @@
 
     <div class="header-toolbar-wrap">
         <div class="header-content-block">
+        <div class="app-card">
         <div class="title-row">
             <h2 class="title-left">車庫証明　作図ツール</h2>
             <div class="title-main">
@@ -257,6 +269,7 @@
     </div>
     <div class="hint-bar">
         ヒント：Shift＝垂直・水平固定／領域外クリック＝端にスナップ／斜線＝クリックで点追加・ダブルクリックで完了／選択＝ドラッグで移動／削除＝ツール選択後クリックで削除
+    </div>
     </div>
     </div>
     </div>
