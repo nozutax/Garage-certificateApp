@@ -838,7 +838,7 @@
                         drawArrow(ctx, s.x1, s.y1, s.x2, s.y2); drawArrow(ctx, s.x2, s.y2, s.x1, s.y1);
                         const mx = (s.x1+s.x2)/2, my = (s.y1+s.y2)/2, tw = ctx.measureText(s.text).width;
                         ctx.fillStyle = "white"; ctx.fillRect(mx-tw/2-6, my-15, tw+12, 30);
-                        ctx.fillStyle = s.color; ctx.textAlign="center"; ctx.fillText(s.text, mx, my+9);
+                        ctx.fillStyle = s.color; ctx.textAlign="center"; ctx.textBaseline="alphabetic"; ctx.fillText(s.text, mx, my+9);
                     }
                 } else if(s.type==='text'){
                     const fontSize = s.fontSize != null ? s.fontSize : 32;
@@ -1012,6 +1012,7 @@
                     context.fillRect(mx - tw / 2 - 6, my - 15, tw + 12, 30);
                     context.fillStyle = s.color;
                     context.textAlign = 'center';
+                    context.textBaseline = 'alphabetic';
                     context.fillText(s.text, mx, my + 9);
                 }
             } else if (s.type === 'text') {
@@ -1246,7 +1247,7 @@
                             drawArrow(exCtx, s.x1, s.y1, s.x2, s.y2); drawArrow(exCtx, s.x2, s.y2, s.x1, s.y1);
                             const mx = (s.x1+s.x2)/2, my = (s.y1+s.y2)/2, tw = exCtx.measureText(s.text).width;
                             exCtx.fillStyle = "white"; exCtx.fillRect(mx-tw/2-6, my-15, tw+12, 30);
-                            exCtx.fillStyle = s.color; exCtx.textAlign="center"; exCtx.fillText(s.text, mx, my+9);
+                            exCtx.fillStyle = s.color; exCtx.textAlign="center"; exCtx.textBaseline="alphabetic"; exCtx.fillText(s.text, mx, my+9);
                         }
                     } else if(s.type==='text'){
                         const fontSize = s.fontSize != null ? s.fontSize : 32;
