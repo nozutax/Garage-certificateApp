@@ -296,6 +296,7 @@
         let mapOffsetX = 0, mapOffsetY = 0;
         let mapPanning = false, mapPanStartX = 0, mapPanStartY = 0, mapPanStartOffsetX = 0, mapPanStartOffsetY = 0;
         let lastMapCenter = '', lastMapZoom = 19;
+        let lastMapCenterLatLng = null;  // 住所表示時もパン後の再取得用に現在の中心座標を保持
         let mapDrawing = false, mapStartX = 0, mapStartY = 0;
         let mapHatchPoints = [];
         let mapDraggingShapeIndex = -1, mapDragStartX = 0, mapDragStartY = 0;
@@ -359,8 +360,10 @@
             }
             const center = input;
             const zoom = lastMapZoom;
-            const url = '/api/staticmap?center=' + encodeURIComponent(center) + '&zoom=' + zoom;
+            const coordMatch = input.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+            lastMapCenterLatLng = coordMatch ? { lat: parseFloat(coordMatch[1]), lng: parseFloat(coordMatch[2]) } : null;
 
+            const url = '/api/staticmap?center=' + encodeURIComponent(center) + '&zoom=' + zoom;
             fetch(url)
                 .then(function(response) {
                     if (!response.ok) {
@@ -408,6 +411,39 @@
             }
             lastMapZoom = Math.max(14, Math.min(20, lastMapZoom + delta));
             document.getElementById('map-address').value = lastMapCenter;
+            loadMapImage();
+        }
+
+        // ピクセルオフセットから緯度経度の変化量を算出（ズームレベルと緯度に依存）
+        function pixelOffsetToLatLngDelta(dx, dy, zoom, centerLat) {
+            const scale = 256 * Math.pow(2, zoom);
+            const dlat = (dy * 180) / scale;  // 下方向ドラッグ = 中心が北へ
+            const dlng = (-dx * 360 * Math.cos(centerLat * Math.PI / 180)) / scale;  // 右方向ドラッグ = 中心が西へ
+            return { dlat, dlng };
+        }
+
+        // 地図パン終了時：座標指定の場合は新しい中心で再取得。住所指定の場合はヒントを表示して同じ住所で再取得
+        function reloadMapAfterPan() {
+            if (!mapBackgroundImage || !lastMapCenter) return;
+            if (!lastMapCenterLatLng) {
+                // 住所指定でドラッグした場合
+                alert('指定個所を座標で入力してください。');
+                mapOffsetX = 0;
+                mapOffsetY = 0;
+                loadMapImage();
+                return;
+            }
+            const lat = lastMapCenterLatLng.lat;
+            const lng = lastMapCenterLatLng.lng;
+            const { dlat, dlng } = pixelOffsetToLatLngDelta(mapOffsetX, mapOffsetY, lastMapZoom, lat);
+            const newLat = Math.max(-85, Math.min(85, lat + dlat));
+            const newLng = ((lng + dlng) + 180) % 360 - 180;
+            const newCenter = newLat + ',' + newLng;
+            lastMapCenterLatLng = { lat: newLat, lng: newLng };
+            document.getElementById('map-address').value = newCenter;
+            lastMapCenter = newCenter;
+            mapOffsetX = 0;
+            mapOffsetY = 0;
             loadMapImage();
         }
 
@@ -548,6 +584,7 @@
         function handleGlobalMouseUp(e) {
             if (mapPanning) {
                 mapPanning = false;
+                reloadMapAfterPan();
                 return;
             }
             if (currentTool === 'select' && draggingShapeIndex >= 0) {
