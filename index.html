@@ -963,19 +963,6 @@
                 mapCtx.lineTo(p.x, p.y);
                 mapCtx.stroke();
             }
-            // 中心に赤い＋を描画
-            const cx = mapCanvas.width / 2, cy = mapCanvas.height / 2, crossLen = 18;
-            mapCtx.save();
-            mapCtx.strokeStyle = '#ff0000';
-            mapCtx.lineWidth = 3;
-            mapCtx.lineCap = 'square';
-            mapCtx.beginPath();
-            mapCtx.moveTo(cx - crossLen, cy);
-            mapCtx.lineTo(cx + crossLen, cy);
-            mapCtx.moveTo(cx, cy - crossLen);
-            mapCtx.lineTo(cx, cy + crossLen);
-            mapCtx.stroke();
-            mapCtx.restore();
         }
 
         function drawOneShape(context, s, cw, ch) {
@@ -1053,9 +1040,14 @@
                 context.stroke();
             }
             context.restore();
-            // 外枠色
-            context.strokeStyle = color; 
+            // 外周を実線で囲む
+            context.beginPath();
+            context.moveTo(points[0].x, points[0].y);
+            points.forEach(p => context.lineTo(p.x, p.y));
+            context.closePath();
+            context.strokeStyle = color;
             context.lineWidth = 1;
+            context.setLineDash([]);
             context.stroke();
         }
 
@@ -1208,18 +1200,6 @@
                     mapExCtx.drawImage(mapBackgroundImage, mapOffsetX, mapOffsetY, mapCanvas.width, mapCanvas.height);
                 }
                 mapShapes.forEach(s => drawOneShape(mapExCtx, s, mapExCanvas.width, mapExCanvas.height));
-                const cx = mapExCanvas.width / 2, cy = mapExCanvas.height / 2, crossLen = 18;
-                mapExCtx.save();
-                mapExCtx.strokeStyle = '#ff0000';
-                mapExCtx.lineWidth = 3;
-                mapExCtx.lineCap = 'square';
-                mapExCtx.beginPath();
-                mapExCtx.moveTo(cx - crossLen, cy);
-                mapExCtx.lineTo(cx + crossLen, cy);
-                mapExCtx.moveTo(cx, cy - crossLen);
-                mapExCtx.lineTo(cx, cy + crossLen);
-                mapExCtx.stroke();
-                mapExCtx.restore();
 
                 // 右：従来の配置図の画像を生成（グリッドなし）
                 const exCanvas = document.createElement('canvas');
