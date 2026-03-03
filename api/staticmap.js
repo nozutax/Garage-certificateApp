@@ -10,7 +10,7 @@ export default function handler(req, res) {
   // ※ 'https://' から始まる完全なオリジンを指定してください
   const ALLOWED_ORIGINS = [
     'http://localhost:3000', // ローカル開発用
-    'https://garage-certificate.vercel.app', // あなたの本番ドメイン例
+    'https://garage-certificate-app.vercel.app/', // あなたの本番ドメイン例
     // 必要に応じて追加
   ];
 
