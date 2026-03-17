@@ -10,7 +10,7 @@
         window.SUPABASE_ANON_KEY = '';
     </script>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: flex-start; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: flex-start; background: #f4f7f6; margin: 0; padding: 20px; }
         .toolbar { background: #f7f8fa; padding: 10px 14px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid #ddd; cursor: default; width: 100%; box-sizing: border-box; position: relative; z-index: 10; }
         .group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .group.group-sep { padding-bottom: 0; margin-bottom: 0; }
@@ -20,7 +20,7 @@
         
         #canvas-container { 
             position: relative; width: 708px; height: 681px; border: 2px solid #333; background: white; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: visible;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1); overflow: visible; cursor: none;
         }
         canvas { position: absolute; top: 0; left: 0; width: 708px; height: 681px; }
         
@@ -130,7 +130,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            cursor: none;
         }
         #map-canvas-container {
             position: relative;
@@ -140,6 +139,7 @@
             background: #e8e8e8;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             overflow: visible;
+            cursor: none;
         }
         #map-canvas-container canvas {
             position: absolute;
@@ -194,9 +194,9 @@
         }
     </style>
 </head>
-<body onmousemove="handleGlobalMouseMove(event)" onmousedown="handleGlobalMouseDown(event)" onmouseup="handleGlobalMouseUp(event)">
+<body>
 
-    <div id="custom-cursor"></div>
+    <div id="custom-cursor" style="display:none;"></div>
 
     <div class="header-toolbar-wrap">
         <div class="header-content-block">
@@ -320,7 +320,6 @@
 
     <script>
         const TEMPLATE_URL = 'https://nozutax.github.io/PDF-Export-with-Shapes/shozaizu-haichizu.pdf';
-        const { PDFDocument } = PDFLib;
 
         let supabase = null;
         let currentSession = null;
@@ -576,6 +575,8 @@
             lastMouseY = e.clientY;
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
+            const overCanvas = e.target === canvas || e.target === mapCanvas;
+            cursor.style.display = overCanvas ? 'block' : 'none';
             if (drawing || hatchPoints.length > 0) redraw();
             if (draggingShapeIndex >= 0) {
                 const p = getPos(lastMouseX, lastMouseY);
@@ -1290,6 +1291,7 @@
         }
 
         async function generateFinalPDF() {
+            const { PDFDocument } = PDFLib;
             try {
                 const nameInputEl = document.getElementById('user-name');
                 const rawName = nameInputEl ? nameInputEl.value.trim() : '';
@@ -1416,7 +1418,11 @@
             } catch (e) { alert(e); }
         }
 
-        setTool('rect'); // 初期ツール
+        document.addEventListener('mousemove', handleGlobalMouseMove);
+        document.addEventListener('mousedown', handleGlobalMouseDown);
+        document.addEventListener('mouseup', handleGlobalMouseUp);
+
+        setTool('rect');
         initAuth();
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', updateCanvasScale);
