@@ -6,12 +6,8 @@
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase project settings (public)
-        // Set these to enable login:
-        // window.SUPABASE_URL = 'https://xxxxxxxxxxxx.supabase.co';
-        // window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        window.SUPABASE_URL = window.SUPABASE_URL || '';
-        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+        window.SUPABASE_URL = '';
+        window.SUPABASE_ANON_KEY = '';
     </script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: flex-start; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
@@ -323,12 +319,7 @@
         const TEMPLATE_URL = 'https://nozutax.github.io/PDF-Export-with-Shapes/shozaizu-haichizu.pdf';
         const { PDFDocument } = PDFLib;
 
-        const SUPABASE_URL = window.SUPABASE_URL || '';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-        const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
-
+        let supabase = null;
         let currentSession = null;
 
         function getMonthKey(d) {
@@ -357,6 +348,16 @@
         }
 
         async function initAuth() {
+            try {
+                const cfgResp = await fetch('/api/config');
+                if (cfgResp.ok) {
+                    const cfg = await cfgResp.json();
+                    if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
+                        supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+                    }
+                }
+            } catch (_) {}
+
             if (!supabase) {
                 window.location.replace('login.html');
                 return;

@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <title>ログイン｜車庫証明 作図ツール</title>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-        window.SUPABASE_URL = window.SUPABASE_URL || '';
-        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-    </script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -105,25 +101,40 @@
             <label for="password">パスワード</label>
             <input type="password" id="password" placeholder="パスワード" autocomplete="current-password" />
         </div>
-        <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン</button>
+        <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>読み込み中...</button>
         <div class="status-msg" id="status-msg"></div>
         <div class="admin-link"><a href="admin.html">管理者はこちら</a></div>
     </div>
 
     <script>
-        const SUPABASE_URL = window.SUPABASE_URL || '';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
-        const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
-            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-            : null;
+        let sb = null;
 
-        (async function checkAlreadyLoggedIn() {
-            if (!sb) return;
-            const { data } = await sb.auth.getSession();
-            if (data && data.session) {
-                window.location.replace('index.html');
+        async function initSupabase() {
+            const msg = document.getElementById('status-msg');
+            const btn = document.getElementById('login-btn');
+            try {
+                const r = await fetch('/api/config');
+                if (!r.ok) throw new Error('config API error');
+                const cfg = await r.json();
+                if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+                    msg.textContent = 'サーバにSupabase設定がありません（環境変数 SUPABASE_URL / SUPABASE_ANON_KEY を確認）';
+                    return;
+                }
+                sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+                const { data } = await sb.auth.getSession();
+                if (data && data.session) {
+                    window.location.replace('index.html');
+                    return;
+                }
+
+                btn.disabled = false;
+                btn.textContent = 'ログイン';
+            } catch (e) {
+                msg.textContent = '設定の読み込みに失敗しました。';
             }
-        })();
+        }
+        initSupabase();
 
         document.getElementById('password').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') doLogin();
@@ -134,7 +145,7 @@
             const btn = document.getElementById('login-btn');
 
             if (!sb) {
-                msg.textContent = 'Supabase が未設定です（SUPABASE_URL / SUPABASE_ANON_KEY）';
+                msg.textContent = 'Supabase が初期化されていません。ページを再読み込みしてください。';
                 return;
             }
 
