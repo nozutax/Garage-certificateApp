@@ -2,7 +2,8 @@ function isAllowedOrigin(req) {
   const referer = req.headers.referer || req.headers.origin || '';
   return (
     referer.includes('https://garage-certificate-app.vercel.app') ||
-    referer.includes('http://localhost:3000')
+    referer.includes('.vercel.app') ||
+    referer.includes('http://localhost')
   );
 }
 

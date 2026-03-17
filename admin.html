@@ -181,7 +181,15 @@
                 const data = await r.json().catch(() => ({}));
                 if (!r.ok) {
                     msg.className = 'status-msg error';
-                    msg.textContent = 'パスコードが違います。';
+                    if (r.status === 403) {
+                        msg.textContent = 'アクセス拒否（403）: このドメインからのアクセスが許可されていません。';
+                    } else if (r.status === 500) {
+                        msg.textContent = 'サーバ設定エラー（500）: ADMIN_PANEL_SECRET 環境変数が未設定の可能性があります。';
+                    } else if (r.status === 401) {
+                        msg.textContent = 'パスコードが違います。';
+                    } else {
+                        msg.textContent = '認証失敗 (' + r.status + '): ' + (data.error || r.statusText);
+                    }
                     return;
                 }
 

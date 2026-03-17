@@ -6,10 +6,10 @@ export default function handler(req, res) {
   // ---------------------------------------------------------
   const referer = req.headers.referer || req.headers.origin || '';
 
-  // Vercel本番とlocalhostだけを許可
   const isAllowed =
     referer.includes('https://garage-certificate-app.vercel.app') ||
-    referer.includes('http://localhost:3000');
+    referer.includes('.vercel.app') ||
+    referer.includes('http://localhost');
 
   if (!isAllowed) {
     console.warn(`Blocked access from: ${referer || 'Unknown'}`);
