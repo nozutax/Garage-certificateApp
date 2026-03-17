@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <title>車庫証明　作図ツール</title>
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase project settings (public)
+        // Set these to enable login:
+        // window.SUPABASE_URL = 'https://xxxxxxxxxxxx.supabase.co';
+        // window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        window.SUPABASE_URL = window.SUPABASE_URL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    </script>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; align-items: flex-start; background: #f4f7f6; margin: 0; padding: 20px; cursor: none; }
         .toolbar { background: #f7f8fa; padding: 10px 14px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid #ddd; cursor: default; width: 100%; box-sizing: border-box; }
@@ -71,6 +80,77 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+        .auth-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+            margin-left: 8px;
+        }
+        .auth-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .auth-row input {
+            padding: 6px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            min-width: 180px;
+            box-sizing: border-box;
+        }
+        .auth-row button {
+            padding: 7px 10px;
+            font-size: 12px;
+        }
+        .auth-status {
+            font-size: 12px;
+            color: #666;
+        }
+        .usage-panel {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            max-width: 520px;
+        }
+        .usage-panel ul {
+            margin: 4px 0 0 0;
+            padding-left: 18px;
+        }
+        .usage-panel li {
+            margin: 2px 0;
+        }
+        .admin-panel {
+            margin-top: 8px;
+            padding: 10px 12px;
+            border: 1px dashed #ddd;
+            border-radius: 10px;
+            background: #fbfbfc;
+            max-width: 520px;
+        }
+        .admin-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 6px;
+        }
+        .admin-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+            white-space: pre-wrap;
+        }
+        .admin-panel input {
+            padding: 6px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            min-width: 180px;
+            box-sizing: border-box;
         }
         .header-toolbar-wrap {
             width: 100%;
@@ -179,6 +259,33 @@
                 <label for="user-name"ファイル名用</label>
                 <input type="text" id="user-name" class="name-input" placeholder="氏名を入力" />
                 <button onclick="generateFinalPDF()" class="download-btn">完成PDF保存</button>
+                <div class="auth-panel" id="auth-panel">
+                    <div class="auth-row">
+                        <input type="email" id="auth-email" placeholder="メールアドレス" autocomplete="email" />
+                        <input type="password" id="auth-password" placeholder="パスワード" autocomplete="current-password" />
+                        <button type="button" onclick="signIn()" title="ログイン">ログイン</button>
+                        <button type="button" onclick="signOut()" title="ログアウト" id="btn-logout" style="display:none;">ログアウト</button>
+                    </div>
+                    <div class="auth-status" id="auth-status">未ログイン</div>
+                    <div class="usage-panel" id="usage-panel" style="display:none;">
+                        <div><span id="usage-month-label"></span>のPDF保存回数: <b id="usage-month-count">0</b></div>
+                        <div style="margin-top:4px;">直近の履歴</div>
+                        <ul id="usage-history-list"></ul>
+                    </div>
+                    <div class="admin-panel" id="admin-panel">
+                        <div class="admin-title">管理者（アカウント発行）</div>
+                        <div class="auth-row">
+                            <input type="password" id="admin-secret" placeholder="管理者パスコード" autocomplete="off" />
+                            <button type="button" onclick="setAdminSecret()">管理者モード</button>
+                        </div>
+                        <div class="auth-row" style="margin-top:6px;">
+                            <input type="email" id="admin-new-email" placeholder="新規ユーザーのメール" autocomplete="off" />
+                            <input type="password" id="admin-new-password" placeholder="初期パスワード" autocomplete="off" />
+                            <button type="button" onclick="adminCreateUser()">ユーザー作成</button>
+                        </div>
+                        <div class="admin-status" id="admin-status">管理者モード: 未設定</div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="toolbar">
@@ -288,6 +395,152 @@
     <script>
         const TEMPLATE_URL = 'https://nozutax.github.io/PDF-Export-with-Shapes/shozaizu-haichizu.pdf';
         const { PDFDocument } = PDFLib;
+
+        // ---------------------------------------------------------
+        // Supabase Auth (メール+パスワード)
+        // 使い方:
+        // - Vercel環境変数はサーバ側（/api/*）で設定
+        // - フロントは公開キー（anon key）のみ利用
+        // ---------------------------------------------------------
+        const SUPABASE_URL = window.SUPABASE_URL || '';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+        const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        let currentSession = null;
+        let adminSecret = '';
+
+        function getMonthKey(d) {
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            return `${yyyy}-${mm}`;
+        }
+
+        function setAuthStatus(text) {
+            const el = document.getElementById('auth-status');
+            if (el) el.textContent = text;
+        }
+
+        function setLoggedInUI(isLoggedIn, email) {
+            const btnLogout = document.getElementById('btn-logout');
+            const usagePanel = document.getElementById('usage-panel');
+            if (btnLogout) btnLogout.style.display = isLoggedIn ? 'inline-block' : 'none';
+            if (usagePanel) usagePanel.style.display = isLoggedIn ? 'block' : 'none';
+            if (isLoggedIn) setAuthStatus(`ログイン中: ${email || ''}`);
+            else setAuthStatus('未ログイン');
+        }
+
+        async function refreshUsageHistory() {
+            if (!currentSession || !currentSession.access_token) return;
+            const monthKey = getMonthKey(new Date());
+            const monthLabelEl = document.getElementById('usage-month-label');
+            if (monthLabelEl) monthLabelEl.textContent = monthKey;
+
+            try {
+                const resp = await fetch('/api/usage/monthly', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + currentSession.access_token
+                    }
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const list = Array.isArray(data.items) ? data.items : [];
+                const current = list.find(x => x && x.month === monthKey);
+                const countEl = document.getElementById('usage-month-count');
+                if (countEl) countEl.textContent = String(current ? (current.count || 0) : 0);
+
+                const ul = document.getElementById('usage-history-list');
+                if (ul) {
+                    ul.innerHTML = '';
+                    list.slice(0, 12).forEach(it => {
+                        const li = document.createElement('li');
+                        li.textContent = `${it.month}: ${it.count}回`;
+                        ul.appendChild(li);
+                    });
+                }
+            } catch (_) {
+                // ignore
+            }
+        }
+
+        async function initAuth() {
+            if (!supabase) {
+                setAuthStatus('Supabase未設定（SUPABASE_URL / SUPABASE_ANON_KEY）');
+                return;
+            }
+
+            const { data } = await supabase.auth.getSession();
+            currentSession = data ? data.session : null;
+            const email = currentSession && currentSession.user ? currentSession.user.email : '';
+            setLoggedInUI(!!currentSession, email);
+            if (currentSession) await refreshUsageHistory();
+
+            supabase.auth.onAuthStateChange(async (_event, session) => {
+                currentSession = session;
+                const em = session && session.user ? session.user.email : '';
+                setLoggedInUI(!!session, em);
+                if (session) await refreshUsageHistory();
+            });
+        }
+
+        async function signIn() {
+            if (!supabase) return alert('Supabaseが未設定です。');
+            const email = (document.getElementById('auth-email') || {}).value || '';
+            const password = (document.getElementById('auth-password') || {}).value || '';
+            if (!email.trim() || !password) return alert('メールアドレスとパスワードを入力してください。');
+            const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+            if (error) return alert('ログインに失敗しました: ' + error.message);
+        }
+
+        async function signOut() {
+            if (!supabase) return;
+            await supabase.auth.signOut();
+        }
+
+        function setAdminSecret() {
+            const v = (document.getElementById('admin-secret') || {}).value || '';
+            adminSecret = (v || '').trim();
+            const st = document.getElementById('admin-status');
+            if (st) st.textContent = adminSecret ? '管理者モード: 有効' : '管理者モード: 未設定';
+        }
+
+        async function adminCreateUser() {
+            const st = document.getElementById('admin-status');
+            if (!adminSecret) {
+                if (st) st.textContent = '管理者モード: 未設定（管理者パスコードを入力してください）';
+                return;
+            }
+            const email = ((document.getElementById('admin-new-email') || {}).value || '').trim();
+            const password = (document.getElementById('admin-new-password') || {}).value || '';
+            if (!email || !password) {
+                if (st) st.textContent = 'メールと初期パスワードを入力してください。';
+                return;
+            }
+
+            if (st) st.textContent = 'ユーザー作成中...';
+            try {
+                const r = await fetch('/api/admin/users/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Secret': adminSecret
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await r.json().catch(() => ({}));
+                if (!r.ok) {
+                    if (st) st.textContent = `作成失敗: ${data.error || r.statusText}`;
+                    return;
+                }
+                if (st) st.textContent = `作成OK: ${data.email || email}\nuser_id: ${data.user_id || ''}`;
+                (document.getElementById('admin-new-email') || {}).value = '';
+                (document.getElementById('admin-new-password') || {}).value = '';
+            } catch (e) {
+                if (st) st.textContent = '作成失敗: 通信エラー';
+            }
+        }
 
         const canvas = document.getElementById('draw-canvas');
         const ctx = canvas.getContext('2d');
@@ -1288,10 +1541,31 @@
                 link.href = URL.createObjectURL(new Blob([out], {type: 'application/pdf'}));
                 link.download = `${dateStr}_${safeName}_保管場所所在図.pdf`;
                 link.click();
+
+                // PDF保存（ダウンロード）成功としてカウント
+                if (currentSession && currentSession.access_token) {
+                    fetch('/api/pdf-save/increment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + currentSession.access_token
+                        },
+                        body: JSON.stringify({ month: getMonthKey(now) })
+                    }).then(async (r) => {
+                        if (!r.ok) return;
+                        const data = await r.json();
+                        const countEl = document.getElementById('usage-month-count');
+                        if (countEl && data && data.month === getMonthKey(now)) {
+                            countEl.textContent = String(data.count || 0);
+                        }
+                        await refreshUsageHistory();
+                    }).catch(() => {});
+                }
             } catch (e) { alert(e); }
         }
 
         setTool('rect'); // 初期ツール
+        initAuth();
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', updateCanvasScale);
         } else {
