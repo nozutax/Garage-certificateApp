@@ -131,6 +131,11 @@
             border-radius: 10px;
             background: #fbfbfc;
             max-width: 520px;
+            cursor: default;
+        }
+        .admin-panel.admin-active {
+            border-color: #28a745;
+            background: #f0fff4;
         }
         .admin-title {
             font-size: 12px;
@@ -152,6 +157,11 @@
             min-width: 180px;
             box-sizing: border-box;
         }
+        .auth-panel, .auth-panel input, .auth-panel button {
+            cursor: default;
+        }
+        .auth-panel button { cursor: pointer; }
+        .auth-panel input { cursor: text; }
         .header-toolbar-wrap {
             width: 100%;
             max-width: 1680px;
@@ -277,13 +287,14 @@
                         <div class="auth-row">
                             <input type="password" id="admin-secret" placeholder="管理者パスコード" autocomplete="off" />
                             <button type="button" onclick="setAdminSecret()">管理者モード</button>
+                            <button type="button" onclick="exitAdminMode()" id="btn-admin-exit" style="display:none;">解除</button>
                         </div>
-                        <div class="auth-row" style="margin-top:6px;">
+                        <div id="admin-create-row" class="auth-row" style="display:none; margin-top:6px;">
                             <input type="email" id="admin-new-email" placeholder="新規ユーザーのメール" autocomplete="off" />
                             <input type="password" id="admin-new-password" placeholder="初期パスワード" autocomplete="off" />
                             <button type="button" onclick="adminCreateUser()">ユーザー作成</button>
                         </div>
-                        <div class="admin-status" id="admin-status">管理者モード: 未設定</div>
+                        <div class="admin-status" id="admin-status">管理者モード: OFF</div>
                     </div>
                 </div>
             </div>
@@ -500,10 +511,40 @@
         }
 
         function setAdminSecret() {
-            const v = (document.getElementById('admin-secret') || {}).value || '';
+            const input = document.getElementById('admin-secret');
+            const v = input ? input.value : '';
             adminSecret = (v || '').trim();
             const st = document.getElementById('admin-status');
-            if (st) st.textContent = adminSecret ? '管理者モード: 有効' : '管理者モード: 未設定';
+            const panel = document.getElementById('admin-panel');
+            const createRow = document.getElementById('admin-create-row');
+            const exitBtn = document.getElementById('btn-admin-exit');
+
+            if (adminSecret) {
+                if (st) st.textContent = '管理者モード: ON（ユーザー作成できます）';
+                if (panel) panel.classList.add('admin-active');
+                if (createRow) createRow.style.display = 'flex';
+                if (exitBtn) exitBtn.style.display = 'inline-block';
+                if (input) input.type = 'text';
+            } else {
+                if (st) st.textContent = '管理者モード: OFF（パスコードを入力してください）';
+                if (panel) panel.classList.remove('admin-active');
+                if (createRow) createRow.style.display = 'none';
+                if (exitBtn) exitBtn.style.display = 'none';
+            }
+        }
+
+        function exitAdminMode() {
+            adminSecret = '';
+            const input = document.getElementById('admin-secret');
+            if (input) { input.value = ''; input.type = 'password'; }
+            const st = document.getElementById('admin-status');
+            if (st) st.textContent = '管理者モード: OFF';
+            const panel = document.getElementById('admin-panel');
+            if (panel) panel.classList.remove('admin-active');
+            const createRow = document.getElementById('admin-create-row');
+            if (createRow) createRow.style.display = 'none';
+            const exitBtn = document.getElementById('btn-admin-exit');
+            if (exitBtn) exitBtn.style.display = 'none';
         }
 
         async function adminCreateUser() {
