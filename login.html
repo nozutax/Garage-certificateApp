@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン｜車庫証明 作図ツール</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        window.SUPABASE_URL = window.SUPABASE_URL || '';
+        window.SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+    </script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-card h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .login-card .subtitle {
+            font-size: 13px;
+            color: #888;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 13px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .login-btn:hover { background: #0056b3; }
+        .login-btn:disabled { background: #aaa; cursor: not-allowed; }
+        .status-msg {
+            font-size: 13px;
+            color: #d9534f;
+            text-align: center;
+            margin-top: 14px;
+            min-height: 20px;
+        }
+        .admin-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+        .admin-link a { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>車庫証明 作図ツール</h1>
+        <p class="subtitle">ログインしてください</p>
+        <div class="form-group">
+            <label for="email">メールアドレス</label>
+            <input type="email" id="email" placeholder="example@mail.com" autocomplete="email" />
+        </div>
+        <div class="form-group">
+            <label for="password">パスワード</label>
+            <input type="password" id="password" placeholder="パスワード" autocomplete="current-password" />
+        </div>
+        <button class="login-btn" id="login-btn" onclick="doLogin()">ログイン</button>
+        <div class="status-msg" id="status-msg"></div>
+        <div class="admin-link"><a href="admin.html">管理者はこちら</a></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = window.SUPABASE_URL || '';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+        const sb = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            : null;
+
+        (async function checkAlreadyLoggedIn() {
+            if (!sb) return;
+            const { data } = await sb.auth.getSession();
+            if (data && data.session) {
+                window.location.replace('index.html');
+            }
+        })();
+
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        async function doLogin() {
+            const msg = document.getElementById('status-msg');
+            const btn = document.getElementById('login-btn');
+
+            if (!sb) {
+                msg.textContent = 'Supabase が未設定です（SUPABASE_URL / SUPABASE_ANON_KEY）';
+                return;
+            }
+
+            const email = (document.getElementById('email').value || '').trim();
+            const password = document.getElementById('password').value || '';
+            if (!email || !password) {
+                msg.textContent = 'メールアドレスとパスワードを入力してください。';
+                return;
+            }
+
+            msg.textContent = '';
+            btn.disabled = true;
+            btn.textContent = 'ログイン中...';
+
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+
+            if (error) {
+                msg.textContent = 'ログインに失敗しました: ' + error.message;
+                btn.disabled = false;
+                btn.textContent = 'ログイン';
+                return;
+            }
+
+            window.location.replace('index.html');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>管理者画面｜車庫証明 作図ツール</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .admin-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 40px;
+            width: 100%;
+            max-width: 520px;
+        }
+        .admin-card h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .admin-card .subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .section {
+            margin-bottom: 28px;
+        }
+        .section h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        .form-group {
+            margin-bottom: 12px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: #007bff; }
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:disabled { background: #aaa; cursor: not-allowed; }
+        .btn-primary { background: #007bff; }
+        .btn-primary:hover:not(:disabled) { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover:not(:disabled) { background: #1e7e34; }
+        .btn-danger { background: #d9534f; }
+        .btn-danger:hover:not(:disabled) { background: #b52b27; }
+        .status-msg {
+            font-size: 13px;
+            margin-top: 10px;
+            min-height: 20px;
+            white-space: pre-wrap;
+        }
+        .status-msg.error { color: #d9534f; }
+        .status-msg.success { color: #28a745; }
+        .status-msg.info { color: #666; }
+        .hidden { display: none !important; }
+        .admin-active-badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #28a745;
+            border: 1px solid #28a745;
+            border-radius: 12px;
+            padding: 2px 10px;
+            margin-left: 8px;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+        .back-link a { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="admin-card">
+        <h1>管理者画面 <span id="admin-badge" class="admin-active-badge hidden">認証済み</span></h1>
+        <p class="subtitle">アカウント発行・管理</p>
+
+        <!-- Step 1: パスコード認証 -->
+        <div class="section" id="section-auth">
+            <h2>管理者認証</h2>
+            <div class="form-group">
+                <label for="admin-secret">管理者パスコード</label>
+                <input type="password" id="admin-secret" placeholder="パスコードを入力" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" id="btn-auth" onclick="verifyAdmin()">認証</button>
+            <div class="status-msg" id="auth-msg"></div>
+        </div>
+
+        <!-- Step 2: ユーザー作成（認証後に表示） -->
+        <div class="section hidden" id="section-create">
+            <h2>新規ユーザー作成</h2>
+            <div class="form-group">
+                <label for="new-email">メールアドレス</label>
+                <input type="email" id="new-email" placeholder="user@example.com" autocomplete="off" />
+            </div>
+            <div class="form-group">
+                <label for="new-password">初期パスワード</label>
+                <input type="text" id="new-password" placeholder="初期パスワード" autocomplete="off" />
+            </div>
+            <button class="btn btn-success" id="btn-create" onclick="createUser()">ユーザー作成</button>
+            <div class="status-msg" id="create-msg"></div>
+        </div>
+
+        <!-- 管理者モード解除 -->
+        <div class="section hidden" id="section-exit">
+            <button class="btn btn-danger" onclick="exitAdmin()">管理者モード解除</button>
+        </div>
+
+        <div class="back-link"><a href="login.html">ログイン画面へ戻る</a></div>
+    </div>
+
+    <script>
+        let adminSecret = '';
+
+        document.getElementById('admin-secret').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') verifyAdmin();
+        });
+
+        async function verifyAdmin() {
+            const msg = document.getElementById('auth-msg');
+            const input = document.getElementById('admin-secret');
+            const secret = (input.value || '').trim();
+
+            if (!secret) {
+                msg.className = 'status-msg error';
+                msg.textContent = 'パスコードを入力してください。';
+                return;
+            }
+
+            msg.className = 'status-msg info';
+            msg.textContent = '認証中...';
+
+            try {
+                const r = await fetch('/api/admin/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Secret': secret
+                    }
+                });
+                const data = await r.json().catch(() => ({}));
+                if (!r.ok) {
+                    msg.className = 'status-msg error';
+                    msg.textContent = 'パスコードが違います。';
+                    return;
+                }
+
+                adminSecret = secret;
+                msg.className = 'status-msg success';
+                msg.textContent = '認証OK';
+
+                document.getElementById('section-auth').classList.add('hidden');
+                document.getElementById('section-create').classList.remove('hidden');
+                document.getElementById('section-exit').classList.remove('hidden');
+                document.getElementById('admin-badge').classList.remove('hidden');
+
+            } catch (e) {
+                msg.className = 'status-msg error';
+                msg.textContent = '通信エラーが発生しました。';
+            }
+        }
+
+        async function createUser() {
+            const msg = document.getElementById('create-msg');
+            const email = (document.getElementById('new-email').value || '').trim();
+            const password = document.getElementById('new-password').value || '';
+
+            if (!email || !password) {
+                msg.className = 'status-msg error';
+                msg.textContent = 'メールアドレスと初期パスワードを入力してください。';
+                return;
+            }
+
+            msg.className = 'status-msg info';
+            msg.textContent = 'ユーザー作成中...';
+
+            try {
+                const r = await fetch('/api/admin/users/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Secret': adminSecret
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await r.json().catch(() => ({}));
+
+                if (!r.ok) {
+                    msg.className = 'status-msg error';
+                    msg.textContent = '作成失敗: ' + (data.error || r.statusText);
+                    return;
+                }
+
+                msg.className = 'status-msg success';
+                msg.textContent = '作成OK: ' + (data.email || email) + '\nuser_id: ' + (data.user_id || '');
+                document.getElementById('new-email').value = '';
+                document.getElementById('new-password').value = '';
+
+            } catch (e) {
+                msg.className = 'status-msg error';
+                msg.textContent = '通信エラーが発生しました。';
+            }
+        }
+
+        function exitAdmin() {
+            adminSecret = '';
+            document.getElementById('admin-secret').value = '';
+            document.getElementById('auth-msg').textContent = '';
+            document.getElementById('section-auth').classList.remove('hidden');
+            document.getElementById('section-create').classList.add('hidden');
+            document.getElementById('section-exit').classList.add('hidden');
+            document.getElementById('admin-badge').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
