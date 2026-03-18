@@ -570,12 +570,17 @@
             loadMapImage();
         }
 
+        function getEventElementTarget(e) {
+            return e && e.target instanceof Element ? e.target : null;
+        }
+
         function handleGlobalMouseMove(e) {
             lastMouseX = e.clientX;
             lastMouseY = e.clientY;
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
-            const overCanvas = e.target === canvas || e.target === mapCanvas;
+            const targetEl = getEventElementTarget(e);
+            const overCanvas = targetEl === canvas || targetEl === mapCanvas;
             cursor.style.display = overCanvas ? 'block' : 'none';
             if (drawing || hatchPoints.length > 0) redraw();
             if (draggingShapeIndex >= 0) {
@@ -603,10 +608,12 @@
         let pendingTextPos = null;
 
         function handleGlobalMouseDown(e) {
-            if (e.target.closest('.toolbar') || e.target.closest('.title-row') || e.target.closest('.map-address-row') || e.target.closest('#multi-modal') || e.target.closest('#text-modal')) return;
-            if (e.target !== canvas && e.target !== mapCanvas) return;
+            const targetEl = getEventElementTarget(e);
+            if (!targetEl) return;
+            if (targetEl.closest('.toolbar') || targetEl.closest('.title-row') || targetEl.closest('.map-address-row') || targetEl.closest('#multi-modal') || targetEl.closest('#text-modal')) return;
+            if (targetEl !== canvas && targetEl !== mapCanvas) return;
 
-            const isMap = (e.target === mapCanvas);
+            const isMap = (targetEl === mapCanvas);
             const p = isMap ? getMapPos(e.clientX, e.clientY) : getPos(e.clientX, e.clientY);
 
             if (isMap) {
@@ -891,9 +898,11 @@
         }
 
         window.addEventListener('dblclick', (e) => {
-            if (e.target.closest('.toolbar') || e.target.closest('.title-row') || e.target.closest('#multi-modal') || e.target.closest('#text-modal')) return;
-            if (currentTool === 'hatch' && e.target === mapCanvas && mapHatchPoints.length > 2) finishMapHatch();
-            if (currentTool === 'hatch' && e.target === canvas && hatchPoints.length > 2) finishHatch();
+            const targetEl = getEventElementTarget(e);
+            if (!targetEl) return;
+            if (targetEl.closest('.toolbar') || targetEl.closest('.title-row') || targetEl.closest('#multi-modal') || targetEl.closest('#text-modal')) return;
+            if (currentTool === 'hatch' && targetEl === mapCanvas && mapHatchPoints.length > 2) finishMapHatch();
+            if (currentTool === 'hatch' && targetEl === canvas && hatchPoints.length > 2) finishHatch();
         });
 
         function finishHatch() {
