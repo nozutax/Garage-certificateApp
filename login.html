@@ -87,6 +87,21 @@
             color: #999;
         }
         .admin-link a { color: #666; }
+        .session-actions {
+            display: none;
+            margin-top: 12px;
+            gap: 8px;
+            flex-direction: column;
+        }
+        .session-actions button {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 13px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +118,10 @@
         </div>
         <button class="login-btn" id="login-btn" onclick="doLogin()" disabled>読み込み中...</button>
         <div class="status-msg" id="status-msg"></div>
+        <div class="session-actions" id="session-actions">
+            <button type="button" id="btn-go-index">作図画面へ進む</button>
+            <button type="button" id="btn-logout-here">別アカウントでログインする</button>
+        </div>
         <div class="admin-link"><a href="admin.html">管理者はこちら</a></div>
     </div>
 
@@ -124,7 +143,10 @@
 
                 const { data } = await sb.auth.getSession();
                 if (data && data.session) {
-                    window.location.replace('index.html');
+                    msg.textContent = '既にログイン済みです。';
+                    document.getElementById('session-actions').style.display = 'flex';
+                    btn.disabled = true;
+                    btn.textContent = 'ログイン済み';
                     return;
                 }
 
@@ -135,6 +157,21 @@
             }
         }
         initSupabase();
+
+        document.getElementById('btn-go-index').addEventListener('click', function() {
+            window.location.replace('index.html');
+        });
+        document.getElementById('btn-logout-here').addEventListener('click', async function() {
+            const msg = document.getElementById('status-msg');
+            const btn = document.getElementById('login-btn');
+            const actions = document.getElementById('session-actions');
+            if (!sb) return;
+            await sb.auth.signOut();
+            actions.style.display = 'none';
+            msg.textContent = 'ログアウトしました。メールアドレスとパスワードを入力してください。';
+            btn.disabled = false;
+            btn.textContent = 'ログイン';
+        });
 
         document.getElementById('password').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') doLogin();
