@@ -346,7 +346,7 @@
                 });
                 if (!resp.ok) return;
                 const data = await resp.json();
-                const list = Array.isArray(data.items) ? data.items : [];
+                const list = Array.isArray(data.items) ? data.items :[];
                 const monthKey = getMonthKey(new Date());
                 const current = list.find(x => x && x.month === monthKey);
                 const countEl = document.getElementById('usage-month-count');
@@ -406,28 +406,28 @@
 
         const mapCanvas = document.getElementById('map-canvas');
         const mapCtx = mapCanvas.getContext('2d');
-        let mapShapes = [];
+        let mapShapes =[];
         let mapBackgroundImage = null;
         let mapOffsetX = 0, mapOffsetY = 0;
         let mapPanning = false, mapPanStartX = 0, mapPanStartY = 0, mapPanStartOffsetX = 0, mapPanStartOffsetY = 0;
         let lastMapCenter = '', lastMapZoom = 18;
         let lastMapCenterLatLng = null;  // 住所表示時もパン後の再取得用に現在の中心座標を保持
         let mapDrawing = false, mapStartX = 0, mapStartY = 0;
-        let mapHatchPoints = [];
+        let mapHatchPoints =[];
         let mapDraggingShapeIndex = -1, mapDragStartX = 0, mapDragStartY = 0;
         let mapPendingTextPos = null;
         let activeCanvas = 'main'; // 'main' | 'map'
         
         let currentTool = 'rect', currentColor = '#000000', drawing = false;
         let startX, startY, shapes = [], isShiftDown = false;
-        let hatchPoints = []; 
+        let hatchPoints =[]; 
         let lastMouseX = 0, lastMouseY = 0; 
         let tempMultiRect = null;
         let tempMultiRectForMap = false; 
         let draggingShapeIndex = -1, dragStartX = 0, dragStartY = 0;
 
         // 共通の操作履歴（左・右どちらの描写かだけを記録）
-        let drawHistory = [];// { target: 'main' | 'map' }
+        let opHistory =[]; // { target: 'main' | 'map' }
 
         const FONT_SIZE_L = "bold 32px sans-serif";
         const FONT_SIZE_S = "bold 20px sans-serif"; 
@@ -756,14 +756,14 @@
                     const d = prompt("距離を入力:");
                     if (d) {
                         mapShapes.push({ type: 'dist', x1: mapStartX, y1: mapStartY, x2: endX, y2: endY, text: d + "m", color: '#ff0000' });
-                        history.push({ target: 'map' });
+                        opHistory.push({ target: 'map' });
                     }
                 } else {
                     if (isShiftDown && currentTool !== 'rect') {
                         if (Math.abs(endX - mapStartX) > Math.abs(endY - mapStartY)) endY = mapStartY; else endX = mapStartX;
                     }
                     mapShapes.push({ type: currentTool, x1: mapStartX, y1: mapStartY, x2: endX, y2: endY, color: currentColor });
-                    history.push({ target: 'map' });
+                    opHistory.push({ target: 'map' });
                 }
                 redrawMap();
                 return;
@@ -785,14 +785,14 @@
                 const d = prompt("距離を入力:");
                 if (d) {
                     shapes.push({type:'dist', x1:startX, y1:startY, x2:endX, y2:endY, text:d+"m", color:'#ff0000'});
-                    history.push({ target: 'main' });
+                    opHistory.push({ target: 'main' });
                 }
             } else {
                 if (isShiftDown && currentTool !== 'rect') {
                     if (Math.abs(endX - startX) > Math.abs(endY - startY)) endY = startY; else endX = startX;
                 }
                 shapes.push({type:currentTool, x1:startX, y1:startY, x2:endX, y2:endY, color:currentColor});
-                history.push({ target: 'main' });
+                opHistory.push({ target: 'main' });
             }
             redraw();
         }
@@ -837,7 +837,7 @@
                     const fontSize = s.fontSize != null ? s.fontSize : 32;
                     const lineRatio = s.lineHeight != null ? s.lineHeight : 1.25;
                     const lineHeight = fontSize * lineRatio;
-                    const lines = (s.lines && s.lines.length > 0) ? s.lines : (s.text != null ? [s.text] : []);
+                    const lines = (s.lines && s.lines.length > 0) ? s.lines : (s.text != null ? [s.text] :[]);
                     if (lines.length === 0) continue;
                     ctx.save();
                     ctx.font = `bold ${fontSize}px sans-serif`;
@@ -884,7 +884,7 @@
                     const fontSize = s.fontSize != null ? s.fontSize : 32;
                     const lineRatio = s.lineHeight != null ? s.lineHeight : 1.25;
                     const lineHeight = fontSize * lineRatio;
-                    const lines = (s.lines && s.lines.length > 0) ? s.lines : (s.text != null ? [s.text] : []);
+                    const lines = (s.lines && s.lines.length > 0) ? s.lines : (s.text != null ?[s.text] :[]);
                     if (lines.length === 0) continue;
                     mapCtx.save();
                     mapCtx.font = 'bold ' + fontSize + 'px sans-serif';
@@ -921,14 +921,14 @@
 
         function finishHatch() {
             shapes.push({type:'hatch', points: [...hatchPoints], color: currentColor}); // color保存
-            history.push({ target: 'main' });
-            hatchPoints = [];
+            opHistory.push({ target: 'main' });
+            hatchPoints =[];
             redraw();
         }
         function finishMapHatch() {
             mapShapes.push({ type: 'hatch', points: [...mapHatchPoints], color: currentColor });
-            history.push({ target: 'map' });
-            mapHatchPoints = [];
+            opHistory.push({ target: 'map' });
+            mapHatchPoints =[];
             redrawMap();
         }
 
@@ -1215,7 +1215,7 @@
 
         function setTool(t) {
             currentTool = t;
-            hatchPoints = [];
+            hatchPoints =[];
             drawing = false;
             draggingShapeIndex = -1;
 
@@ -1281,11 +1281,11 @@
             if (c >= 2) {
                 if (tempMultiRectForMap) {
                     mapShapes.push({ type: 'multi', ...tempMultiRect, count: c, dir: d });
-                    history.push({ target: 'map' });
+                    opHistory.push({ target: 'map' });
                     redrawMap();
                 } else {
                     shapes.push({ type: 'multi', ...tempMultiRect, count: c, dir: d });
-                    history.push({ target: 'main' });
+                    opHistory.push({ target: 'main' });
                     redraw();
                 }
             }
@@ -1306,7 +1306,7 @@
                 const fontSize = parseInt(document.getElementById('text-size').value, 10) || 32;
                 const lineHeight = parseFloat(document.getElementById('text-line-height').value) || 1.25;
                 mapShapes.push({ type: 'text', x: mapPendingTextPos.x, y: mapPendingTextPos.y, lines: lines, color: currentColor, fontSize: fontSize, lineHeight: lineHeight });
-                history.push({ target: 'map' });
+                opHistory.push({ target: 'map' });
                 mapPendingTextPos = null;
                 closeTextModal();
                 redrawMap();
@@ -1319,7 +1319,7 @@
             const fontSize = parseInt(document.getElementById('text-size').value, 10) || 32;
             const lineHeight = parseFloat(document.getElementById('text-line-height').value) || 1.25;
             shapes.push({ type: 'text', x: pendingTextPos.x, y: pendingTextPos.y, lines: lines, color: currentColor, fontSize: fontSize, lineHeight: lineHeight });
-            history.push({ target: 'main' });
+            opHistory.push({ target: 'main' });
             closeTextModal();
             redraw();
         }
@@ -1329,15 +1329,15 @@
         }
         function undo() {
             // 履歴に基づいて、直近の1操作だけを取り消す（左・右どちらか片方）
-            if (history.length === 0) return;
-            const last = history.pop();
+            if (opHistory.length === 0) return;
+            const last = opHistory.pop();
             if (last.target === 'main' && shapes.length > 0) {
                 shapes.pop();
-                hatchPoints = [];
+                hatchPoints =[];
                 redraw();
             } else if (last.target === 'map' && mapShapes.length > 0) {
                 mapShapes.pop();
-                mapHatchPoints = [];
+                mapHatchPoints =[];
                 redrawMap();
             }
         }
@@ -1345,9 +1345,9 @@
             if(confirm("全消去しますか？")) {
                 shapes = [];
                 hatchPoints = [];
-                mapShapes = [];
+                mapShapes =[];
                 mapHatchPoints = [];
-                history = [];
+                opHistory =[];
                 redraw();
                 redrawMap();
             }
