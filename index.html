@@ -43,7 +43,7 @@
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 30px rgba(0,0,0,0.4); z-index: 1000; cursor: default;
         }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; pointer-events: none; }
         .hint-bar {
             font-size: 13px;
             color: #888;
@@ -191,6 +191,13 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             border: 1px solid #e0e0e0;
             box-sizing: border-box;
+        }
+        .app-card button,
+        .app-card input,
+        .app-card select,
+        #draw-canvas,
+        #map-canvas {
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -1468,9 +1475,24 @@
         }
 
         try {
+            const modalOverlay = document.getElementById('modal-overlay');
+            const textModalOverlay = document.getElementById('text-modal-overlay');
+            if (modalOverlay) modalOverlay.style.display = 'none';
+            if (textModalOverlay) textModalOverlay.style.display = 'none';
+
             document.addEventListener('mousemove', handleGlobalMouseMove);
             document.addEventListener('mousedown', handleGlobalMouseDown);
             document.addEventListener('mouseup', handleGlobalMouseUp);
+            if (canvas) {
+                canvas.addEventListener('mousedown', handleGlobalMouseDown);
+                canvas.addEventListener('mouseup', handleGlobalMouseUp);
+                canvas.addEventListener('mousemove', handleGlobalMouseMove);
+            }
+            if (mapCanvas) {
+                mapCanvas.addEventListener('mousedown', handleGlobalMouseDown);
+                mapCanvas.addEventListener('mouseup', handleGlobalMouseUp);
+                mapCanvas.addEventListener('mousemove', handleGlobalMouseMove);
+            }
 
             bindUIActions();
             setTool('rect');
