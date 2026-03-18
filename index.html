@@ -588,7 +588,7 @@
             cursor.style.top = e.clientY + 'px';
             const targetEl = (e.currentTarget === canvas || e.currentTarget === mapCanvas)
                 ? e.currentTarget
-                : getEventElementTarget(e);
+                : (document.elementFromPoint(e.clientX, e.clientY) || getEventElementTarget(e));
             const overCanvas = targetEl === canvas || targetEl === mapCanvas;
             cursor.style.display = overCanvas ? 'block' : 'none';
             if (drawing || hatchPoints.length > 0) redraw();
@@ -1487,18 +1487,13 @@
             if (modalOverlay) modalOverlay.style.display = 'none';
             if (textModalOverlay) textModalOverlay.style.display = 'none';
 
-            document.addEventListener('mousemove', handleGlobalMouseMove);
-            document.addEventListener('mousedown', handleGlobalMouseDown);
-            document.addEventListener('mouseup', handleGlobalMouseUp);
+            window.addEventListener('mousemove', handleGlobalMouseMove);
+            window.addEventListener('mouseup', handleGlobalMouseUp);
             if (canvas) {
                 canvas.addEventListener('mousedown', handleGlobalMouseDown);
-                canvas.addEventListener('mouseup', handleGlobalMouseUp);
-                canvas.addEventListener('mousemove', handleGlobalMouseMove);
             }
             if (mapCanvas) {
                 mapCanvas.addEventListener('mousedown', handleGlobalMouseDown);
-                mapCanvas.addEventListener('mouseup', handleGlobalMouseUp);
-                mapCanvas.addEventListener('mousemove', handleGlobalMouseMove);
             }
 
             bindUIActions();
