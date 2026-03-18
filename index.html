@@ -1190,9 +1190,13 @@
             c.stroke();
         }
 
-        function setColor(c) { 
-            currentColor = c; 
-            document.querySelectorAll('.color-btn').forEach(b => b.classList.toggle('active', b.style.backgroundColor.rgb === c || (c==='#000000' && b.id==='col-black') || (c==='#ff0000' && b.id==='col-red'))); 
+        function setColor(c) {
+            currentColor = c;
+            document.querySelectorAll('.color-btn').forEach((b) => {
+                const isBlack = c === '#000000' && b.id === 'col-black';
+                const isRed = c === '#ff0000' && b.id === 'col-red';
+                b.classList.toggle('active', isBlack || isRed);
+            });
         }
 
         function setTool(t) {
@@ -1272,7 +1276,10 @@
             closeTextModal();
             redraw();
         }
-        document.getElementById('text-modal-overlay').addEventListener('click', closeTextModal);
+        const textModalOverlayEl = document.getElementById('text-modal-overlay');
+        if (textModalOverlayEl) {
+            textModalOverlayEl.addEventListener('click', closeTextModal);
+        }
         function undo() {
             // 履歴に基づいて、直近の1操作だけを取り消す（左・右どちらか片方）
             if (history.length === 0) return;
@@ -1427,18 +1434,23 @@
             } catch (e) { alert(e); }
         }
 
-        document.addEventListener('mousemove', handleGlobalMouseMove);
-        document.addEventListener('mousedown', handleGlobalMouseDown);
-        document.addEventListener('mouseup', handleGlobalMouseUp);
+        try {
+            document.addEventListener('mousemove', handleGlobalMouseMove);
+            document.addEventListener('mousedown', handleGlobalMouseDown);
+            document.addEventListener('mouseup', handleGlobalMouseUp);
 
-        setTool('rect');
-        initAuth();
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', updateCanvasScale);
-        } else {
-            updateCanvasScale();
+            setTool('rect');
+            initAuth();
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', updateCanvasScale);
+            } else {
+                updateCanvasScale();
+            }
+            window.addEventListener('resize', updateCanvasScale);
+        } catch (e) {
+            console.error('初期化エラー:', e);
+            alert('初期化エラーが発生しました: ' + (e && e.message ? e.message : e));
         }
-        window.addEventListener('resize', updateCanvasScale);
     </script>
 </body>
 </html>
