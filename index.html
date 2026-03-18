@@ -586,7 +586,9 @@
             lastMouseY = e.clientY;
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
-            const targetEl = getEventElementTarget(e);
+            const targetEl = (e.currentTarget === canvas || e.currentTarget === mapCanvas)
+                ? e.currentTarget
+                : getEventElementTarget(e);
             const overCanvas = targetEl === canvas || targetEl === mapCanvas;
             cursor.style.display = overCanvas ? 'block' : 'none';
             if (drawing || hatchPoints.length > 0) redraw();
@@ -615,7 +617,9 @@
         let pendingTextPos = null;
 
         function handleGlobalMouseDown(e) {
-            const targetEl = getEventElementTarget(e);
+            const targetEl = (e.currentTarget === canvas || e.currentTarget === mapCanvas)
+                ? e.currentTarget
+                : getEventElementTarget(e);
             if (!targetEl) return;
             if (targetEl.closest('.toolbar') || targetEl.closest('.title-row') || targetEl.closest('.map-address-row') || targetEl.closest('#multi-modal') || targetEl.closest('#text-modal')) return;
             if (targetEl !== canvas && targetEl !== mapCanvas) return;
@@ -721,6 +725,9 @@
         }
 
         function handleGlobalMouseUp(e) {
+            const targetEl = (e.currentTarget === canvas || e.currentTarget === mapCanvas)
+                ? e.currentTarget
+                : getEventElementTarget(e);
             if (mapPanning) {
                 mapPanning = false;
                 reloadMapAfterPan();
