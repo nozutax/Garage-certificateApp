@@ -43,7 +43,7 @@
             display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 30px rgba(0,0,0,0.4); z-index: 1000; cursor: default;
         }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; pointer-events: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 999; }
         .hint-bar {
             font-size: 13px;
             color: #888;
@@ -297,7 +297,7 @@
     </div>
     </div>
     <div class="hint-bar">
-        ヒント：Shift＝垂直・水平固定／網掛け＝クリックで点追加・ダブルクリックで完了／選択＝ドラッグで移動／削除＝ツール選択後クリックで削除
+        ヒント：文字＝選択後キャンバスをクリックして入力／Shift＝垂直・水平固定／網掛け＝クリックで点追加・ダブルクリックで完了／選択＝ドラッグで移動／削除＝ツール選択後クリック
     </div>
     </div>
     </div>
@@ -356,48 +356,23 @@
             } catch (_) {}
         }
 
-        async function initAuth() {
-            try {
-                const cfgResp = await fetch('/api/config');
-                if (cfgResp.ok) {
-                    const cfg = await cfgResp.json();
-                    if (cfg.supabaseUrl && cfg.supabaseAnonKey && window.supabase) {
-                        supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-                    }
-                }
-            } catch (_) {}
-
-            if (!supabase) {
-                window.location.replace('login.html');
-                return;
-            }
-            const { data } = await supabase.auth.getSession();
-            currentSession = data ? data.session : null;
-            if (!currentSession) {
-                window.location.replace('login.html');
-                return;
-            }
-            const email = currentSession.user ? currentSession.user.email : '';
+        function initStandaloneMode() {
+            currentSession = null;
             const statusEl = document.getElementById('auth-status');
-            if (statusEl) statusEl.textContent = 'ログイン中: ' + email;
-            await refreshUsageCount();
-
-            supabase.auth.onAuthStateChange(async (_event, session) => {
-                currentSession = session;
-                if (!session) {
-                    window.location.replace('login.html');
-                    return;
-                }
-                const em = session.user ? session.user.email : '';
-                if (statusEl) statusEl.textContent = 'ログイン中: ' + em;
-                await refreshUsageCount();
-            });
+            if (statusEl) statusEl.textContent = 'スタンドアロンモード（ログインなし）';
+            const badge = document.getElementById('usage-badge');
+            if (badge) badge.style.display = 'none';
+            const logoutBtn = document.getElementById('btn-logout');
+            if (logoutBtn) {
+                logoutBtn.textContent = 'ログイン機能OFF';
+                logoutBtn.disabled = true;
+                logoutBtn.style.opacity = '0.6';
+                logoutBtn.style.cursor = 'default';
+            }
         }
 
-        async function doLogout() {
-            if (!supabase) return;
-            await supabase.auth.signOut();
-            window.location.replace('login.html');
+        function doLogout() {
+            // スタンドアロンモードではログアウト機能は使用しない
         }
 
         const canvas = document.getElementById('draw-canvas');
@@ -1518,7 +1493,7 @@
 
             setupActionDelegation();
             setTool('rect');
-            initAuth();
+            initStandaloneMode();
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', updateCanvasScale);
             } else {
